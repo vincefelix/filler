@@ -1,49 +1,51 @@
-pub fn calcul_min_distance(piece: &Vec<Vec<char>>, ennemycoords: &Vec<(usize,usize)>,(xg,yg):(usize,usize), distance:f32) -> f32 {
-    let playerows = piece[0].len(); 
-    let mut min_dist=distance;
-
-    for yp in 0..piece.len(){
-        for xp in 0..playerows {
-            if piece[yp][xp] != '.' {
-                for (xe,ye) in ennemycoords {
-                    let  dist=(((*ye as f32)-((yp + yg) as f32) ).powf(2.) + ((*xe as f32)-((xp + xg) as f32)).powf(2.)).sqrt();
-                    if dist < min_dist{
-                        min_dist = dist;
-                    }
-                }
-            }
-        }
-    }
-     
-    return min_dist
+pub fn calculate_distance_between_points(point1: (i32, i32), point2: (i32, i32)) -> f32 {
+    let dx = (point2.0 - point1.0) as f32;
+    let dy = (point2.1 - point1.1) as f32;
+    (dx * dx + dy * dy).sqrt()
 }
 
-pub fn placable_piece(grid: &Vec<Vec<char>>, piece: &Vec<Vec<char>>, pchars: &Vec<char>, xg: usize, yg: usize) -> bool {
-    let mut cross = 0; 
-    let mut stop = false;
-    let playerows = piece[0].len(); 
+pub fn is_valid_placement(
+    x: usize,
+    y: usize,
+    board: &[Vec<char>],
+    piece: &[Vec<char>],
+    player_symbols: (char, char),
+) -> bool {
+    let mut overlap_count = 0;
+    let piece_height = piece.len();
+    let piece_width = piece[0].len();
+    let board_height = board.len();
+    let board_width = board[0].len();
 
-    for yp in 0..piece.len(){
-        for xp in 0..playerows {
-            if piece[yp][xp] != '.' {
-                if pchars.contains(&grid[yg+yp][xg+xp]) {
-                    cross +=1;
-                    if cross>1 {
-                        stop = true;
-                        break;
-                    }
-                } else if grid[yg+yp][xg+xp] != '.' {
-                    stop = true;
-                    break;
+    for i in 0..piece_height {
+        for j in 0..piece_width {
+            let board_x = x + i;
+            let board_y = y + j;
+            if board_x >= board_height || board_y >= board_width {
+                return false;
+            }
+            let board_cell = board[board_x][board_y];
+            if piece[i][j] != '.' {
+                if board_cell == player_symbols.0 || board_cell == player_symbols.1 {
+                    overlap_count += 1;
+                } else if board_cell != '.' {
+                    return false;
                 }
             }
         }
-        if stop {
-            break
+    }
+    overlap_count == 1
+}
+
+pub fn get_opponent_positions(board: &[Vec<char>], player_symbols: (char, char)) -> Vec<(usize, usize)> {
+    let mut positions = Vec::new();
+    for x in 0..board.len() {
+        for y in 0..board[0].len() {
+            let cell = board[x][y];
+            if cell != '.' && cell != player_symbols.0 && cell != player_symbols.1 {
+                positions.push((x, y));
+            }
         }
     }
-    if cross==1 && !stop {
-        return  true;
-    }
-    false
+    positions
 }
