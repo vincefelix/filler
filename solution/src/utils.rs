@@ -1,3 +1,5 @@
+use crate::game::Player;
+
 pub fn calculate_distance_between_points(point1: (i32, i32), point2: (i32, i32)) -> f32 {
     let dx = (point2.0 - point1.0) as f32;
     let dy = (point2.1 - point1.1) as f32;
@@ -48,4 +50,16 @@ pub fn get_opponent_positions(board: &[Vec<char>], player_symbols: (char, char))
         }
     }
     positions
+}
+
+
+pub fn run_filler() {
+    let mut player = Player::new();
+
+    loop {
+        player.initialize_identifiant();
+        player.update_board();
+        player.update_piece();
+        player.determine_move();
+    }
 }
